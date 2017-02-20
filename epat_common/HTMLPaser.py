@@ -1,6 +1,7 @@
 # coding=utf-8
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString
+from pprint import pprint
 
 #########################
 #
@@ -20,7 +21,7 @@ def get_page_content(body):
         if child.attrs['id'] == 'page-container':
             return child
 
-#迭代有问题 待修改
+
 def get_ch3_start_page(page_content):
     for page in page_content:
         if isinstance(page, NavigableString):
@@ -28,16 +29,15 @@ def get_ch3_start_page(page_content):
         for div in page:
             if isinstance(div, NavigableString):
                 continue
-            if 'opened' in div.attrs['class']:
-                count = 1
-                for tag in div:
-                    if count != 4:
-                        count += 1
-                        continue
-                    if '第三节' in tag.get_text():
-                        return page
-                    else:
-                        break
+            count = 1
+            for tag in div:
+                if count != 4:
+                    count += 1
+                    continue
+                if '第三节'.decode('utf8') in tag.get_text():
+                    return page
+                else:
+                    break
             else:
                 continue
 
@@ -48,9 +48,4 @@ if __name__ == '__main__':
     page_content = get_page_content(body)
     target_page = get_ch3_start_page(page_content)
     print target_page
-    # for child in page_content:
-    #     if isinstance(child, NavigableString):
-    #         continue
-    #     print '==========='
-    #     print child
-    #     print '==========='
+    pprint(dir(target_page))
