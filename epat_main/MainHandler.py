@@ -60,8 +60,16 @@ def get_ch3_type(table_info):
     return CH3_TABLE_TYPE_2
 
 
+def parse_ch3_table_type1(table_start_tag):
+    res, last_tag = parse_table_base_5_col(table_start_tag)
+    return (res, ), last_tag
+
+
 def parse_ch3_table_type2(table_start_tag):
-    pass
+    res, last_tag = parse_table_base_5_col(table_start_tag)
+    table_start_tag = get_next_table_begin_tag(last_tag)
+    res2, last_tag = parse_table_base_5_col(table_start_tag)
+    return (res, res2), last_tag
 
 
 def main():
@@ -71,16 +79,20 @@ def main():
     (table_info, table_start_tag) = get_table_info(target_page)
     ch3_type = get_ch3_type(table_info)
     if ch3_type == CH3_TABLE_TYPE_1:
-        res = parse_table_base_5_col(table_start_tag)
+        res, last_tag = parse_ch3_table_type1(table_start_tag)
     else:
-        parse_ch3_table_type2(table_start_tag)
+        res, last_tag = parse_ch3_table_type2(table_start_tag)
 
-    for line in table_info:
-        print line
-    for line in res:
-        for elem in line:
-            print elem + '||',
-        print
+    # for line in table_info:
+    #     print line
+    for table in res:
+        print '================ table start ================'
+        for line in table:
+            for elem in line:
+                print elem + '||',
+            print
+        print '================= table end ================='
+
 
 if __name__ == '__main__':
     main()

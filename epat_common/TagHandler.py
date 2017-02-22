@@ -45,3 +45,12 @@ def pass_page_info(page_tag):
             else:
                 return target_div
 
+
+# 向下在同层搜索表格
+def get_next_table_begin_tag(tag):
+    tag = tag.next_sibling
+    while 'c' not in tag.attrs['class']:
+        tag = tag.next_sibling
+        if tag is None:
+            break
+    return tag

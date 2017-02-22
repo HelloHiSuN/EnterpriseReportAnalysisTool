@@ -78,5 +78,5 @@ def parse_table_base_5_col(cell_tag):
         current_class = cell_tag.attrs['class'][2]
         count += 1
 
-    return res
+    return res, cell_tag.previous_sibling
 
