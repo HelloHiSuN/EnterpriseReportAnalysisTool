@@ -14,9 +14,6 @@ from epat_common.TagHandler import *
 #
 #########################
 
-CH3_TABLE_TYPE_1 = 1    # 会计数据和财务指标两个表合并
-CH3_TABLE_TYPE_2 = 2    # 会计数据和财务指标两个表分离
-
 
 def get_ch3_start_page(page_content):
     for page in page_content:
@@ -38,57 +35,35 @@ def get_ch3_start_page(page_content):
                 continue
 
 
-# 返回表格头信息和表格开始div tag
-# (table_info, table_start_tag)
-def get_table_info(page):
-    table_info = []
-    tag = pass_page_info(page)
-    target_div = tag.next_sibling   # 跳过章节信息
-    # 到div的class出现c之前 都是表格头信息
-    # 取出其中所有文本信息，一个div一行
-    while "c" not in target_div.attrs["class"]:
-        table_info.append(target_div.get_text())
-        target_div = target_div.next_sibling
-    return table_info, target_div
-
-
-def get_ch3_type(table_info):
-    regex = '公司是否因会计政策变更及会计差错更正等追溯调整或重述以前年度会计数据'.decode('utf-8')
-    for info in table_info:
-        if regex in info:
-            return CH3_TABLE_TYPE_1
-    return CH3_TABLE_TYPE_2
-
-
-def parse_ch3_table_type1(table_start_tag):
-    res, last_tag = parse_table_base_5_col(table_start_tag)
-    return (res, ), last_tag
-
-
-def parse_ch3_table_type2(table_start_tag):
-    res, last_tag = parse_table_base_5_col(table_start_tag)
-    table_start_tag = get_next_table_begin_tag(last_tag)
-    res2, last_tag = parse_table_base_5_col(table_start_tag)
-    return (res, res2), last_tag
+def get_ch3_all_tables(start_page_tag):
+    table_begin_tag = get_table_begin_tag_in_page(start_page_tag)
+    tables = []
+    res, last_tag = parse_table_base_5_col(table_begin_tag)
+    tables.append(res)
+    still_in_ch3 = True
+    while still_in_ch3:
+        last_tag = get_next_valid_tag(last_tag)
+        while not is_table_tag(last_tag):
+            text = last_tag.get_text()
+            if '董事会报告'.decode('utf8') in text:  # 到达第四节 董事会报告
+                still_in_ch3 = False
+                break
+            last_tag = get_next_valid_tag(last_tag)
+        if still_in_ch3:
+            res, last_tag = parse_table_base_5_col(last_tag)
+            tables.append(res)
+    return tables, last_tag
 
 
 def main():
-    soup = BeautifulSoup(open('/Users/hellohi/pdf/output_test5/test5.html'), 'html.parser')
+    soup = BeautifulSoup(open('/Users/hellohi/pdf/output_test2/test2.html'), 'html.parser')
     page_content = get_page_content(soup)
-    target_page = get_ch3_start_page(page_content)
-    (table_info, table_start_tag) = get_table_info(target_page)
-    ch3_type = get_ch3_type(table_info)
-    if ch3_type == CH3_TABLE_TYPE_1:
-        res, last_tag = parse_ch3_table_type1(table_start_tag)
-    else:
-        res, last_tag = parse_ch3_table_type2(table_start_tag)
-
-    # for line in table_info:
-    #     print line
-    for table in res:
+    ch3_start_page = get_ch3_start_page(page_content)
+    tables, last_tag = get_ch3_all_tables(ch3_start_page)
+    for table in tables:
         print '================ table start ================'
-        for line in table:
-            for elem in line:
+        for row in table:
+            for elem in row:
                 print elem + '||',
             print
         print '================= table end ================='

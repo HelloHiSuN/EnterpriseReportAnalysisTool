@@ -31,7 +31,11 @@ def get_parent_page_tag(tag):
 
 # 获得下一页的页面级tag
 def get_next_page_tag(tag):
-    return get_parent_page_tag(tag).next_sibling
+    tag = get_parent_page_tag(tag)
+    for sibling in tag.next_siblings:
+        if isinstance(sibling, NavigableString):
+            continue
+        return sibling
 
 
 # 跳过页面的<img><页眉><页脚>
@@ -49,8 +53,29 @@ def pass_page_info(page_tag):
 # 向下在同层搜索表格
 def get_next_table_begin_tag(tag):
     tag = tag.next_sibling
-    while 'c' not in tag.attrs['class']:
+    while not is_table_tag(tag):
         tag = tag.next_sibling
         if tag is None:
             break
+    return tag
+
+
+# 获取一页中表格开始的tag
+def get_table_begin_tag_in_page(page_tag):
+    start_tag = pass_page_info(page_tag)
+    return get_next_table_begin_tag(start_tag.previous_sibling)
+
+
+# 判断tag是不是表格tag
+def is_table_tag(tag):
+    return 'c' in tag.attrs['class']
+
+
+# 获取下一个有效tag
+def get_next_valid_tag(tag):
+    if tag.next_sibling is None:
+        tag = get_next_page_tag(tag)
+        tag = pass_page_info(tag)
+    else:
+        tag = tag.next_sibling
     return tag
