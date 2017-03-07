@@ -36,34 +36,31 @@ def get_next_page_tag(tag):
         if isinstance(sibling, NavigableString):
             continue
         return sibling
+    return None
 
 
 # 跳过页面的<img><页眉><页脚>
 def pass_page_info(page_tag):
+
     for tag in page_tag.children:
         # 跳过一个<img /> 页眉div 页脚div
         count = 0
         for target_div in tag:
             if count < 3:
                 count += 1
-            else:
+            elif target_div.get_text().strip():
                 return target_div
 
 
-# 向下在同层搜索表格
-def get_next_table_begin_tag(tag):
-    tag = tag.next_sibling
+# 获取start_tag之后,遇到结束文本之前表格开始的tag
+def get_next_table_begin_tag(tag, end_text):
     while not is_table_tag(tag):
-        tag = tag.next_sibling
+        if end_text.decode('utf8') in tag.get_text():
+            return tag, True
+        tag = get_next_valid_tag(tag)
         if tag is None:
-            break
-    return tag
-
-
-# 获取一页中表格开始的tag
-def get_table_begin_tag_in_page(page_tag):
-    start_tag = pass_page_info(page_tag)
-    return get_next_table_begin_tag(start_tag.previous_sibling)
+            return None, True
+    return tag, False
 
 
 # 判断tag是不是表格tag
@@ -71,10 +68,20 @@ def is_table_tag(tag):
     return 'c' in tag.attrs['class']
 
 
+# 获取整个文档第一个有效tag
+def get_first_valid_tag(page_content):
+    for tag in page_content:
+        if isinstance(tag, NavigableString):
+            continue
+        return pass_page_info(tag)
+
+
 # 获取下一个有效tag
 def get_next_valid_tag(tag):
     if tag.next_sibling is None:
         tag = get_next_page_tag(tag)
+        if tag is None:
+            return None
         tag = pass_page_info(tag)
     else:
         tag = tag.next_sibling

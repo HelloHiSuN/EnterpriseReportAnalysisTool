@@ -1,7 +1,6 @@
 # coding=utf-8
 
 from bs4 import BeautifulSoup
-from pprint import pprint
 from epat_common.TableParser import *
 from epat_common.TagHandler import *
 
@@ -35,31 +34,36 @@ def get_ch3_start_page(page_content):
                 continue
 
 
-def get_ch3_all_tables(start_page_tag):
-    table_begin_tag = get_table_begin_tag_in_page(start_page_tag)
+def get_ch3_all_tables(ch3_start_tag):
+    tag, end_flag = get_next_table_begin_tag(ch3_start_tag, "第四节")
     tables = []
-    res, last_tag = parse_table_base_5_col(table_begin_tag)
-    tables.append(res)
-    still_in_ch3 = True
-    while still_in_ch3:
+    while not end_flag:
+        res, last_tag = parse_table_base_5_col(tag)
+        tables.append(res)
         last_tag = get_next_valid_tag(last_tag)
-        while not is_table_tag(last_tag):
-            text = last_tag.get_text()
-            if '董事会报告'.decode('utf8') in text:  # 到达第四节 董事会报告
-                still_in_ch3 = False
-                break
-            last_tag = get_next_valid_tag(last_tag)
-        if still_in_ch3:
-            res, last_tag = parse_table_base_5_col(last_tag)
-            tables.append(res)
-    return tables, last_tag
+        tag, end_flag = get_next_table_begin_tag(last_tag, "第四节")
+    return tables, tag
+
+
+def get_ch3_start_tag(page_content):
+    tag = get_first_valid_tag(page_content)
+    count = 0
+    while True:
+        if '第三节'.decode('utf8') in tag.get_text():
+            if 0 == count:
+                count += 1
+                tag = get_next_valid_tag(tag)
+            else:
+                return tag
+        else:
+            tag = get_next_valid_tag(tag)
 
 
 def main():
-    soup = BeautifulSoup(open('/Users/hellohi/pdf/output_test2/test2.html'), 'html.parser')
+    soup = BeautifulSoup(open('/Users/hellohi/pdf/output_test7/test7.html'), 'html.parser')
     page_content = get_page_content(soup)
-    ch3_start_page = get_ch3_start_page(page_content)
-    tables, last_tag = get_ch3_all_tables(ch3_start_page)
+    ch3_start_tag = get_ch3_start_tag(page_content)
+    tables, ch4_start_tag = get_ch3_all_tables(ch3_start_tag)
     for table in tables:
         print '================ table start ================'
         for row in table:
