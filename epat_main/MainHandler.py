@@ -3,7 +3,8 @@
 from bs4 import BeautifulSoup
 from epat_common.TableParser import *
 from epat_common.TagHandler import *
-
+from epat_common.Table import Table
+from epat_common.TableElement import TableElement
 #########################
 #
 # 尝试解析 第三节 会计数据和财务重要指标摘要中的表格
@@ -59,12 +60,39 @@ def get_ch3_start_tag(page_content):
             tag = get_next_valid_tag(tag)
 
 
+def get_ch3_tables(ch3_start_tag):
+    tables = []
+    tag, end_flag = get_next_table_begin_tag(ch3_start_tag, "第四节")
+    while not end_flag:
+        table = Table()
+        table_element = TableElement(tag)
+        table.append(table_element)
+        while True:
+            tag = get_next_valid_tag(tag)
+            if is_table_tag(tag):
+                table_element = TableElement(tag)
+                table.append(table_element)
+            else:
+                tables.append(table)
+                tag, end_flag = get_next_table_begin_tag(tag, "第四节")
+
+                break
+    return tables, tag
+
+
 def main():
-    soup = BeautifulSoup(open('/Users/hellohi/pdf/output_test7/test7.html'), 'html.parser')
+    soup = BeautifulSoup(open('/Users/hellohi/pdf/output_test5/test5.html'), 'html.parser')
     page_content = get_page_content(soup)
     ch3_start_tag = get_ch3_start_tag(page_content)
-    tables, ch4_start_tag = get_ch3_all_tables(ch3_start_tag)
+    # tables, ch4_start_tag = get_ch3_all_tables(ch3_start_tag)
+    tables, ch4_start_tag = get_ch3_tables(ch3_start_tag)
+
+    tables_in_list = []
     for table in tables:
+        table_in_list = parse_table(table)
+        tables_in_list.append(table_in_list)
+
+    for table in tables_in_list:
         print '================ table start ================'
         for row in table:
             for elem in row:

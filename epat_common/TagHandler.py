@@ -48,7 +48,9 @@ def pass_page_info(page_tag):
         for target_div in tag:
             if count < 3:
                 count += 1
-            elif target_div.get_text().strip():
+            elif is_table_tag(target_div):
+                return target_div
+            elif target_div.get_text().strip(): #待修改
                 return target_div
 
 
