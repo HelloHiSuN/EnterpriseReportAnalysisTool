@@ -172,7 +172,8 @@ def parse_table(table):
                 row.append(cell.content)
                 current_col_count += 1
 
-        elif cell.y != y_old and cell.h != h_old:
+        # elif cell.y != y_old and cell.h != h_old:
+        elif cell.y != y_old:
             # 进入分割模式1
             split_mode = SPLIT_COLUMN_1
             table.sep_start_count = table.current_line_max_col

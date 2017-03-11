@@ -60,9 +60,9 @@ def get_ch3_start_tag(page_content):
             tag = get_next_valid_tag(tag)
 
 
-def get_ch3_tables(ch3_start_tag):
+def get_ch_n_tables(ch_n_start_tag, end_text):
     tables = []
-    tag, end_flag = get_next_table_begin_tag(ch3_start_tag, "第四节")
+    tag, end_flag = get_next_table_begin_tag(ch_n_start_tag, end_text)
     while not end_flag:
         table = Table()
         table_element = TableElement(tag)
@@ -74,18 +74,21 @@ def get_ch3_tables(ch3_start_tag):
                 table.append(table_element)
             else:
                 tables.append(table)
-                tag, end_flag = get_next_table_begin_tag(tag, "第四节")
+                tag, end_flag = get_next_table_begin_tag(tag, end_text)
 
                 break
     return tables, tag
 
 
 def main():
-    soup = BeautifulSoup(open('/Users/hellohi/pdf/output_test5/test5.html'), 'html.parser')
+    soup = BeautifulSoup(open('/Users/hellohi/pdf/output_test/test.html'), 'html.parser')
     page_content = get_page_content(soup)
     ch3_start_tag = get_ch3_start_tag(page_content)
     # tables, ch4_start_tag = get_ch3_all_tables(ch3_start_tag)
-    tables, ch4_start_tag = get_ch3_tables(ch3_start_tag)
+
+    print '=================== 第四节 ========================'
+
+    tables, ch4_start_tag = get_ch_n_tables(ch3_start_tag, "第四节")
 
     tables_in_list = []
     for table in tables:
@@ -99,6 +102,76 @@ def main():
                 print elem + '||',
             print
         print '================= table end ================='
+
+    print '=================== 第四节 ========================'
+
+    tables, ch5_start_tag = get_ch_n_tables(ch4_start_tag, "第五节")
+
+    tables_in_list = []
+    for table in tables:
+        table_in_list = parse_table(table)
+        tables_in_list.append(table_in_list)
+
+    for table in tables_in_list:
+        print '================ table start ================'
+        for row in table:
+            for elem in row:
+                print elem + '||',
+            print
+        print '================= table end ================='
+
+    print '=================== 第五节 ========================'
+
+    tables, ch6_start_tag = get_ch_n_tables(ch5_start_tag, "第六节")
+
+    tables_in_list = []
+    for table in tables:
+        table_in_list = parse_table(table)
+        tables_in_list.append(table_in_list)
+
+    for table in tables_in_list:
+        print '================ table start ================'
+        for row in table:
+            for elem in row:
+                print elem + '||',
+            print
+        print '================= table end ================='
+
+    print '=================== 第六节 ========================'
+
+    tables, ch7_start_tag = get_ch_n_tables(ch6_start_tag, "第七节")
+
+    tables_in_list = []
+    for table in tables:
+        table_in_list = parse_table(table)
+        tables_in_list.append(table_in_list)
+
+    for table in tables_in_list:
+        print '================ table start ================'
+        for row in table:
+            for elem in row:
+                print elem + '||',
+            print
+        print '================= table end ================='
+    tables, ch8_start_tag = get_ch_n_tables(ch7_start_tag, "第八节")
+    tables, ch9_start_tag = get_ch_n_tables(ch8_start_tag, "第九节")
+    tables, ch10_start_tag = get_ch_n_tables(ch9_start_tag, "第十节")
+    tables, ch11_start_tag = get_ch_n_tables(ch10_start_tag, "第十一节")
+
+    print '*************=================== 第十一节 ========================***********'
+    tables_in_list = []
+    for table in tables:
+        table_in_list = parse_table(table)
+        tables_in_list.append(table_in_list)
+
+    for table in tables_in_list:
+        print '================ table start ================'
+        for row in table:
+            for elem in row:
+                print elem + '||',
+            print
+        print '================= table end ================='
+
 
 
 if __name__ == '__main__':
