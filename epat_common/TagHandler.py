@@ -87,6 +87,7 @@ def get_next_table_begin_tag(tag, end_text, section_info=None):
             return res, True
     if old_tag_1 is None:
         res['header'] = False
+        res['unit'] = False
     elif unit_pattern.match(old_tag_1.get_text()):
         res['unit'] = old_tag_1.get_text()
         if old_tag_2 is not None:
